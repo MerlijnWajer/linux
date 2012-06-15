@@ -1485,6 +1485,10 @@ long syscall_trace_enter(struct pt_regs *regs)
 	if (unlikely(test_thread_flag(TIF_SYSCALL_EMU)))
 		ret = -1L;
 
+    /* XXX: mw: Change this with an extra conditional to check if we want to
+     * send the syscall at all.
+     * We need to do the same for syscall_trace_leave, below.
+     */
 	if ((ret || test_thread_flag(TIF_SYSCALL_TRACE)) &&
 	    tracehook_report_syscall_entry(regs))
 		ret = -1L;

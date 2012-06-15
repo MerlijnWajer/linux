@@ -1517,6 +1517,28 @@ struct task_struct {
 
 	unsigned long ptrace_message;
 	siginfo_t *last_siginfo; /* For ptrace use.  */
+
+    /*
+     * XXX: mw:
+     * ptrace syscall list:
+     *
+     * default = blacklist and empty ptrace_syscall_list.
+     *
+     * int ptrace_use_syscall_filter (for perf?)
+     * int ptrace_is_whitelist; (white or black)
+     * struct ptrace_syscall_list *ptrace_syscall;
+     *
+     * Use kernel linked list for now.
+     * https://isis.poly.edu/kulesh/stuff/src/klist/
+     *
+     * kernel/trace/trace.h, line 83 for syscall_trace_enter struct
+     * arch/x86/kernel/ptrace.c, line 1468 function syscall_trace_enter
+     * ./arch/x86/kernel/entry_64.S for asm
+     * include/linux/sched.h (this file) for task struct.
+     *
+     * include/linux/init_task.h for task init
+     */
+
 	struct task_io_accounting ioac;
 #if defined(CONFIG_TASK_XACCT)
 	u64 acct_rss_mem1;	/* accumulated rss usage */

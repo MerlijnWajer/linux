@@ -832,7 +832,13 @@ int ptrace_request(struct task_struct *child, long request,
 
     case PTRACE_SETSYSCALLMASK:
     {
-        child->ptrace_mask = data;
+        if (addr) {
+            child->ptrace_mask[data / (sizeof(long) * 8)] |=
+                1L << (data % (sizeof(long) * 8));
+        } else {
+            child->ptrace_mask[data / (sizeof(long) * 8)] &=
+                ~(1L << (data % (sizeof(long) * 8)));
+        }
         printk("In ptrace_setsyscallmask, data: %ld\n", data);
         return 0;
         break;

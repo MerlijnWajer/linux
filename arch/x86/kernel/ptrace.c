@@ -1461,6 +1461,17 @@ void send_sigtrap(struct task_struct *tsk, struct pt_regs *regs,
 # define IS_IA32	0
 #endif
 
+static inline int syscall_listed(int syscall_num) {
+    struct thread_info *t;
+    long ret;
+    t = current_thread_info();
+
+    ret = t->task->ptrace_mask[syscall_num/ (sizeof(long) * 8)] &
+        (1L << (syscall_num % (sizeof(long) * 8)));
+
+    return ret != 0L;
+}
+
 /*
  * We must return the syscall number to actually look up in the table.
  * This can be -1L to skip running any syscall at all.
@@ -1492,7 +1503,7 @@ long syscall_trace_enter(struct pt_regs *regs)
 	if (ret || test_thread_flag(TIF_SYSCALL_TRACE)) {
         /*printk("PRE; regs->orig_ax = %ld, ptrace_mask = %ld\n", regs->orig_ax,
             current_thread_info()->task->ptrace_mask);*/
-        if (unlikely(current_thread_info()->task->ptrace_mask == regs->orig_ax)) {
+        if (unlikely(syscall_listed(regs->orig_ax))) {
             /*printk("Skipping: %ld\n", regs->orig_ax);*/
             return ret?: regs->orig_ax;
         } else {
@@ -1541,10 +1552,10 @@ void syscall_trace_leave(struct pt_regs *regs)
 	if (step || test_thread_flag(TIF_SYSCALL_TRACE)) {
         /*printk("POST; regs->orig_ax = %ld, ptrace_mask = %ld\n", regs->orig_ax,
             current_thread_info()->task->ptrace_mask);*/
-        if (likely(current_thread_info()->task->ptrace_mask != regs->orig_ax)) {
-            tracehook_report_syscall_exit(regs, step);
-        } else {
+        if (unlikely(syscall_listed(regs->orig_ax))) {
             /*printk("Skipping: %ld\n", regs->orig_ax);*/
+        } else {
+            tracehook_report_syscall_exit(regs, step);
         }
     }
 }

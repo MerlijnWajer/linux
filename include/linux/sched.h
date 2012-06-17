@@ -1539,9 +1539,7 @@ struct task_struct {
      *
      * include/linux/init_task.h for task init
      */
-
-    unsigned long ptrace_mask;
-
+    unsigned long ptrace_mask[666 / (sizeof(long) * 8)];
     /* mw: END HERE */
 
 

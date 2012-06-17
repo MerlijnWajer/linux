@@ -829,6 +829,15 @@ int ptrace_request(struct task_struct *child, long request,
 		break;
 	}
 #endif
+
+    case PTRACE_SETSYSCALLMASK:
+    {
+        child->ptrace_mask = data;
+        printk("In ptrace_setsyscallmask, data: %ld\n", data);
+        return 0;
+        break;
+    }
+
 	default:
 		break;
 	}

@@ -1489,9 +1489,17 @@ long syscall_trace_enter(struct pt_regs *regs)
      * send the syscall at all.
      * We need to do the same for syscall_trace_leave, below.
      */
-	if ((ret || test_thread_flag(TIF_SYSCALL_TRACE)) &&
-	    tracehook_report_syscall_entry(regs))
-		ret = -1L;
+	if (ret || test_thread_flag(TIF_SYSCALL_TRACE)) {
+        /*printk("PRE; regs->orig_ax = %ld, ptrace_mask = %ld\n", regs->orig_ax,
+            current_thread_info()->task->ptrace_mask);*/
+        if (unlikely(current_thread_info()->task->ptrace_mask == regs->orig_ax)) {
+            /*printk("Skipping: %ld\n", regs->orig_ax);*/
+            return ret?: regs->orig_ax;
+        } else {
+            if (tracehook_report_syscall_entry(regs))
+                ret = -1L;
+        }
+    }
 
 	if (unlikely(test_thread_flag(TIF_SYSCALL_TRACEPOINT)))
 		trace_sys_enter(regs, regs->orig_ax);
@@ -1529,6 +1537,14 @@ void syscall_trace_leave(struct pt_regs *regs)
 	 */
 	step = unlikely(test_thread_flag(TIF_SINGLESTEP)) &&
 			!test_thread_flag(TIF_SYSCALL_EMU);
-	if (step || test_thread_flag(TIF_SYSCALL_TRACE))
-		tracehook_report_syscall_exit(regs, step);
+
+	if (step || test_thread_flag(TIF_SYSCALL_TRACE)) {
+        /*printk("POST; regs->orig_ax = %ld, ptrace_mask = %ld\n", regs->orig_ax,
+            current_thread_info()->task->ptrace_mask);*/
+        if (likely(current_thread_info()->task->ptrace_mask != regs->orig_ax)) {
+            tracehook_report_syscall_exit(regs, step);
+        } else {
+            /*printk("Skipping: %ld\n", regs->orig_ax);*/
+        }
+    }
 }

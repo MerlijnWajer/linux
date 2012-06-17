@@ -21,6 +21,10 @@
 
 #define PTRACE_SYSCALL		  24
 
+/* XXX: mw: BEGIN */
+#define PTRACE_SETSYSCALLMASK 42
+/* XXX mw: END */
+
 /* 0x4200-0x4300 are reserved for architecture-independent additions.  */
 #define PTRACE_SETOPTIONS	0x4200
 #define PTRACE_GETEVENTMSG	0x4201

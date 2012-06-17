@@ -1532,12 +1532,18 @@ struct task_struct {
      * https://isis.poly.edu/kulesh/stuff/src/klist/
      *
      * kernel/trace/trace.h, line 83 for syscall_trace_enter struct
+     * kernel/ptrace.c for the PTRACE_SETSYSCALLMASK stuff.
      * arch/x86/kernel/ptrace.c, line 1468 function syscall_trace_enter
      * ./arch/x86/kernel/entry_64.S for asm
      * include/linux/sched.h (this file) for task struct.
      *
      * include/linux/init_task.h for task init
      */
+
+    unsigned long ptrace_mask;
+
+    /* mw: END HERE */
+
 
 	struct task_io_accounting ioac;
 #if defined(CONFIG_TASK_XACCT)

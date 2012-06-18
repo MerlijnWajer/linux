@@ -839,7 +839,7 @@ int ptrace_request(struct task_struct *child, long request,
             child->ptrace_mask[data / (sizeof(long) * 8)] &=
                 ~(1L << (data % (sizeof(long) * 8)));
         }
-        printk("In ptrace_setsyscallmask, data: %ld\n", data);
+        /*printk("In ptrace_setsyscallmask, data: %ld\n", data);*/
         return 0;
         break;
     }

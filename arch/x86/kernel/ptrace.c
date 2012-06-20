@@ -1461,15 +1461,25 @@ void send_sigtrap(struct task_struct *tsk, struct pt_regs *regs,
 # define IS_IA32	0
 #endif
 
-static inline int syscall_listed(int syscall_num) {
+static inline int syscall_listed(unsigned long syscall_num) {
     struct thread_info *t;
     long ret;
     t = current_thread_info();
 
-    ret = t->task->ptrace_mask[syscall_num/ (sizeof(long) * 8)] &
-        (1L << (syscall_num % (sizeof(long) * 8)));
+    if (unlikely(syscall_num >= PTRACE_SYSCALL_BITMAP_SIZE)) {
+        printk("System call too large: %lu\n", syscall_num);
+        return 0;
+    }
 
-    return ret != 0L;
+    ret = (t->task->ptrace_mask[PTRACE_SYSCALL_BITIDX(syscall_num)] &
+        PTRACE_SYSCALL_BITVAL(syscall_num)) != 0L;
+
+    /* TODO: syscall_listed should be renamed if it takes whitelist into
+     * consideration. */
+
+    ret ^= t->task->ptrace_whitelist;
+
+    return ret;
 }
 
 /*

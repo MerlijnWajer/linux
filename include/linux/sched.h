@@ -1538,8 +1538,14 @@ struct task_struct {
      * include/linux/sched.h (this file) for task struct.
      *
      * include/linux/init_task.h for task init
+     * kernel/fork.c for free_task
      */
+    /* TODO: Change this to a ptr (to a struct that also contains whitelist? */
+    /* TODO: Add an additional datastructure for system calls that don't fit in
+     * 666, like some weird arm syscall. (how do we verify that it is a system
+     * call?) */
     unsigned long ptrace_mask[666 / (sizeof(long) * 8)];
+    int ptrace_whitelist;
     /* mw: END HERE */
 
 

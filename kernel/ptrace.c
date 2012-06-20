@@ -830,17 +830,36 @@ int ptrace_request(struct task_struct *child, long request,
 	}
 #endif
 
+    /* mw: TODO Swap addr en data */
     case PTRACE_SETSYSCALLMASK:
     {
+        if (unlikely(data >= PTRACE_SYSCALL_BITMAP_SIZE))
+            return -EINVAL;
+
         if (addr) {
-            child->ptrace_mask[data / (sizeof(long) * 8)] |=
-                1L << (data % (sizeof(long) * 8));
+            child->ptrace_mask[PTRACE_SYSCALL_BITIDX(data)] |=
+                PTRACE_SYSCALL_BITVAL(data);
         } else {
-            child->ptrace_mask[data / (sizeof(long) * 8)] &=
-                ~(1L << (data % (sizeof(long) * 8)));
+            child->ptrace_mask[PTRACE_SYSCALL_BITIDX(data)] &=
+                ~PTRACE_SYSCALL_BITVAL(data);
         }
-        /*printk("In ptrace_setsyscallmask, data: %ld\n", data);*/
-        return 0;
+        ret = 0;
+        break;
+    }
+
+    case PTRACE_GETSYSCALLMASK:
+    {
+        if (unlikely(data >= PTRACE_SYSCALL_BITMAP_SIZE))
+            return -EINVAL;
+
+        ret = (child->ptrace_mask[PTRACE_SYSCALL_BITIDX(data)] &
+            PTRACE_SYSCALL_BITVAL(data)) == 1;
+        break;
+    }
+    case PTRACE_SYSCALLWHITELIST:
+    {
+        child->ptrace_whitelist = data ? 1 : 0;
+        ret = 0;
         break;
     }
 

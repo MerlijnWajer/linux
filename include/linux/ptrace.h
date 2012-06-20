@@ -23,6 +23,17 @@
 
 /* XXX: mw: BEGIN */
 #define PTRACE_SETSYSCALLMASK 42
+#define PTRACE_GETSYSCALLMASK 43
+#define PTRACE_SYSCALLWHITELIST 44
+
+#define PTRACE_SYSCALL_BITMAP_SIZE 666
+
+/* Move this to another place (in the file) / make this inline? */
+#define PTRACE_SYSCALL_BITIDX(sys) \
+    sys / (sizeof(long) * 8)
+
+#define PTRACE_SYSCALL_BITVAL(sys) \
+    (1L << (sys % (sizeof(long) * 8)))
 /* XXX mw: END */
 
 /* 0x4200-0x4300 are reserved for architecture-independent additions.  */

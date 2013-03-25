@@ -37,7 +37,7 @@
  */
 #define PAGE_OFFSET		UL(CONFIG_PAGE_OFFSET)
 #define TASK_SIZE		(UL(CONFIG_PAGE_OFFSET) - UL(0x01000000))
-#define TASK_UNMAPPED_BASE	(UL(CONFIG_PAGE_OFFSET) / 3)
+#define TASK_UNMAPPED_BASE	ALIGN(TASK_SIZE / 3, SZ_16M)
 
 /*
  * The maximum size of a 26-bit user space task.
@@ -274,14 +274,6 @@ static inline __deprecated void *bus_to_virt(unsigned long x)
 
 #define virt_to_page(kaddr)	pfn_to_page(__pa(kaddr) >> PAGE_SHIFT)
 #define virt_addr_valid(kaddr)	((unsigned long)(kaddr) >= PAGE_OFFSET && (unsigned long)(kaddr) < (unsigned long)high_memory)
-
-/*
- * Optional coherency support.  Currently used only by selected
- * Intel XSC3-based systems.
- */
-#ifndef arch_is_coherent
-#define arch_is_coherent()		0
-#endif
 
 #endif
 
